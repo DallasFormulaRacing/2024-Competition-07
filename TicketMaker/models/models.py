@@ -72,3 +72,11 @@ class Issue(BaseModel):
     @validator('pull_request', pre=True, always=True)
     def default_pull_request(cls, v):
         return v or {}
+
+
+class Message(BaseModel):
+    title: str
+    body: Optional[str] = None
+    labels: List[Label]
+    created_by: str
+    created_at: datetime

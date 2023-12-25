@@ -1,7 +1,8 @@
 import os
 import dotenv
 import requests
-from models.models import Issue
+from models.models import Issue, Message
+from typing import List
 
 dotenv.load_dotenv()
 
@@ -32,5 +33,14 @@ class GitClient:
 
         return issues
 
-    def create_message(self, issue: Issue) -> str:
-        pass
+    def create_message(self, issues: List) -> Message:
+
+        for issue in issues:
+            message = Message(
+                title=issue["title"],
+                body=issue["body"],
+                labels=issue["labels"]["name"],
+                created_by=issue["user"]["login"],
+                created_at=issue["created_at"],
+            )
+            return message
