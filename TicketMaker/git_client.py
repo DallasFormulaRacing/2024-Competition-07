@@ -32,15 +32,3 @@ class GitClient:
                 response.raise_for_status()
 
         return issues
-
-    def create_message(self, issues: List) -> Message:
-
-        for issue in issues:
-            message = Message(
-                title=issue["title"],
-                body=issue["body"],
-                labels=issue["labels"]["name"],
-                created_by=issue["user"]["login"],
-                created_at=issue["created_at"],
-            )
-            return message

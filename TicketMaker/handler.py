@@ -1,13 +1,16 @@
 from git_client import GitClient
-from models.models import Message
+from models.models import Message, Issue
+from discord_client import DiscordClient
 from typing import List
+import os
 
 
 class Handler:
-    def __init__(self, git_url: str):
+    def __init__(self, git_url: str, discord_channel_id: int):
         self.git_client = GitClient(git_url)
+        self.discord_client = DiscordClient(discord_channel_id)
 
-    def get_issues(self) -> List[Message]:
+    def get_issues(self) -> List[Issue]:
         issues = self.git_client.get_issues()
         return issues
 
@@ -28,3 +31,10 @@ class Handler:
             messages.append(message)
 
         return messages
+
+    def send_messages(self, messages: List[Message]):
+        self.discord_client.on_ready()
+        self.discord_client.run(os.getenv("DISCORD_TOKEN"))
+
+        for message in messages:
+            self.discord_client.on_github_issue(message)
