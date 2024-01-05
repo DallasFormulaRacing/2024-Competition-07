@@ -11,8 +11,6 @@ def lambda_handler(event, context):
     message = create_message(issues)
 
     # Sending the message
-    send_message(message)
-
     if send_message(message):
         return {'statusCode': 200, 'body': json.dumps('Message sent to Discord')}
     else:
