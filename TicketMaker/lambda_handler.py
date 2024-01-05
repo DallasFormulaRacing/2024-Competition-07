@@ -27,8 +27,7 @@ def send_message(message) -> bool:
     try:
         response = requests.post(
             DISCORD_URL,
-            data= {"content": message},
-            headers={'Content-Type': 'application/json'}
+            json= {"content": message}
         )
         response.raise_for_status()
 
