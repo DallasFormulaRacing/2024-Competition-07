@@ -13,10 +13,10 @@ def lambda_handler(event, context):
     # Sending the message
     send_message(message)
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps('Message sent to Discord')
-    }
+    if send_message(message):
+        return {'statusCode': 200, 'body': json.dumps('Message sent to Discord')}
+    else:
+        return {'statusCode': 500, 'body': json.dumps('Failed to send message')}
 
 def create_message(issue):
     message = f"New issue created in IC_Repo: {issue['title']}, 
