@@ -14,12 +14,12 @@ def lambda_handler(event, context):
     if 'body' in event:
         payload = json.loads(event['body'])
 
-        if 'issue' in payload and 'action' in payload:
+        if 'issue' in payload and payload.get('action') == 'opened':
             issue = payload['issue']
             action = payload['action']
-            message = [create_message(issue, action)]
 
-            response = send_message_to_discord(message[0])
+            message = create_message(issue, action)
+            response = send_message_to_discord(message)
 
             logger.info("Discord response: " + json.dumps(response))
 
@@ -28,10 +28,11 @@ def lambda_handler(event, context):
                 'body': json.dumps('Message sent to Discord')
             }
         else:
-            logger.error("No issue or action key in payload")
+            logger.info("Ignored action: " +
+                        payload.get('action', 'No action'))
             return {
-                'statusCode': 422,
-                'body': json.dumps('Invalid GitHub payload structure')
+                'statusCode': 200,
+                'body': json.dumps('Ignored non-open issue action')
             }
     else:
         logger.error("No body key in event")
