@@ -1,9 +1,14 @@
 import json
 import requests
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 DISCORD_URL = 'https://discord.com/api/webhooks/1190925331301937172/xmyN8IUsKCSVmtYN8JzGXzYu-V7W37GtAqFtamLMQWVya_2QEjmfshyhQJJ8lKd-flJc'
 
 def lambda_handler(event, context):
+    logger.info('Event:' + json.dumps(event))
     issues = event['issue']
     action = event['action']
 
