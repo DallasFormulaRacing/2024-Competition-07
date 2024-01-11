@@ -1,39 +1,65 @@
 import json
-import requests
 import logging
+import requests
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-DISCORD_URL = 'https://discord.com/api/webhooks/1190925331301937172/xmyN8IUsKCSVmtYN8JzGXzYu-V7W37GtAqFtamLMQWVya_2QEjmfshyhQJJ8lKd-flJc'
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1194890547706462208/XnMJT2L40HbZr8L7qHTije4Un3XvTW8kwZElLa7nndhldBEPrteVJtveNTXt5p6Ox4eS"
+
 
 def lambda_handler(event, context):
-    logger.info('Event:' + json.dumps(event))
-    issues = event['issue']
-    action = event['action']
+    logger.info("Received event: " + json.dumps(event))
 
-    # Creating the message
-    message = create_message(issues)
+    if 'body' in event:
+        payload = json.loads(event['body'])
 
-    # Sending the message
-    if send_message(message):
-        return {'statusCode': 200, 'body': json.dumps('Message sent to Discord')}
+        if 'issue' in payload and 'action' in payload:
+            issue = payload['issue']
+            action = payload['action']
+
+            # creating the message
+            message = create_message(issue, action)
+
+            response = send_message_to_discord(message)
+
+            logger.info("Discord response: " + json.dumps(response))
+
+            return {
+                'statusCode': 200,
+                'body': json.dumps('Message sent to Discord')
+            }
+        else:
+            logger.error("No issue or action key in payload")
+            return {
+                'statusCode': 422,
+                'body': json.dumps('Invalid GitHub payload structure')
+            }
     else:
-        return {'statusCode': 500, 'body': json.dumps('Failed to send message')}
+        logger.error("No body key in event")
+        return {
+            'statusCode': 400,
+            'body': json.dumps('No body in the received event')
+        }
 
-def create_message(issue):
-    message = f"New issue created in IC_Repo: {issue['title']}, 
-      created by: {issue['user']['login']} - {issue['url']}"
+
+def create_message(issue, action):
+    title = issue.get('title', 'No title')
+    user = issue.get('user', {}).get('login', 'Unknown user')
+    url = issue.get('html_url', '#')
+    message = f"GitHub issue {action}: '{title}', created by {user}. URL: {url}"
     return message
 
-def send_message(message) -> bool:
+
+def send_message_to_discord(message):
+    headers = {'Content-Type': 'application/json'}
+    payload = {'content': message}
+
     try:
         response = requests.post(
-            DISCORD_URL,
-            json= {"content": message}
-        )
+            DISCORD_WEBHOOK_URL, json=payload, headers=headers)
         response.raise_for_status()
-
-    except requests.exceptions.HTTPError as err:
-        print(err)
-        return False
+        return {'status': 'success', 'response': response.text}
+    except requests.exceptions.RequestException as error:
+        logger.error(f"Error sending message to Discord: {error}")
+        return {'status': 'failure', 'error': str(error)}
