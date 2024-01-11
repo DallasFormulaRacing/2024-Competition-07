@@ -17,11 +17,9 @@ def lambda_handler(event, context):
         if 'issue' in payload and 'action' in payload:
             issue = payload['issue']
             action = payload['action']
+            message = [create_message(issue, action)]
 
-            # creating the message
-            message = create_message(issue, action)
-
-            response = send_message_to_discord(message)
+            response = send_message_to_discord(message[0])
 
             logger.info("Discord response: " + json.dumps(response))
 
@@ -45,9 +43,11 @@ def lambda_handler(event, context):
 
 def create_message(issue, action):
     title = issue.get('title', 'No title')
-    user = issue.get('user', {}).get('login', 'Unknown user')
-    url = issue.get('html_url', '#')
-    message = f"GitHub issue {action}: '{title}', created by {user}. URL: {url}"
+    user_login = issue['user']['login']
+    issue_number = issue['number']
+    issue_url = issue['html_url']
+
+    message = f"Issue #{issue_number}, titled: {title} was created by {user_login}. You can view it at {issue_url}"
     return message
 
 

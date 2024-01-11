@@ -1,7 +1,7 @@
 import pytest
-from git_client import GitClient
-from handler import Handler
-from discord_client import DiscordClient
+from deprecated.git_client import GitClient
+from deprecated.handler import Handler
+from deprecated.discord_client import DiscordClient
 import os
 
 
