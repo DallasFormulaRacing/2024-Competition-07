@@ -1,6 +1,6 @@
-from git_client import GitClient
+from deprecated.git_client import GitClient
 from models.models import Message, Issue
-from discord_client import DiscordClient
+from deprecated.discord_client import DiscordClient
 from typing import List
 import os
 
